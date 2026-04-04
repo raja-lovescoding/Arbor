@@ -1,15 +1,28 @@
 import { useState } from "react";
 import Message from "./Message";
 import InputBox from "./InputBox";
-import { sendMessage } from "../services/api";
+import { fetchBranches, fetchMessages, sendMessage } from "../services/api";
 import { getPath } from "../utils/getpath";
 import { useEffect } from "react";
-import { fetchMessages } from "../services/api";
 import Sidebar from "./Sidebar";
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState([]);
   const [activeNodeId, setActiveNodeId] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [activeBranchId, setActiveBranchId] = useState(null);
+  useEffect(() => {
+  const loadBranches = async () => {
+    const data = await fetchBranches();
+    setBranches(data);
+
+    if (data.length > 0) {
+      setActiveBranchId(data[0]._id);
+    }
+  };
+
+  loadBranches();
+}, []);
   useEffect(() => {
   const loadMessages = async () => {
     const data = await fetchMessages();
@@ -46,23 +59,24 @@ const visibleMessages = activeNodeId
     <div style={{ padding: "20px" }}>
       <h2>ConceptTree Chat</h2>
     <Sidebar
-        style={{ 
-          float: "left" ,
-          display: "flex",
-          flexDirection: "row"
-          }}
-        messages={messages}
-        onSelect={setActiveNodeId}
-        activeNodeId={activeNodeId}
-      />
+      branches={branches}
+      onSelect={setActiveBranchId}
+      activeBranchId={activeBranchId}
+    />
     <div>
       {visibleMessages.map((msg) => (
-        <Message
-          key={msg._id}
-          msg={msg}
-          onSelect={setActiveNodeId}
-          isActive={msg._id === activeNodeId}
-        />
+      <Message
+        key={msg._id}
+        msg={msg}
+        onSelect={setActiveNodeId}
+        isActive={msg._id === activeNodeId}
+        activeBranchId={activeBranchId}
+        onBranchCreate={(branch) => {
+        setBranches((prev) => [...prev, branch]);
+        setActiveBranchId(branch._id);
+        setActiveNodeId(branch.lastMessageId);
+        }}
+      />
       ))}
     </div>
 

@@ -1,38 +1,44 @@
 import { getBranches } from "../utils/getBranches";
 
-const Sidebar = ({ messages, onSelect, activeNodeId }) => {
-  const branches = getBranches(messages);
+const Sidebar = ({ branches, onSelect, activeBranchId }) => {
+  const map = {};
+  const roots = [];
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "220px",
-        borderRight: "1px solid #ccc",
-        padding: "10px",
-      }}
-    >
-      <h3>Branches</h3>
+  branches.forEach((b) => {
+    map[b._id] = { ...b, children: [] };
+  });
 
-      {branches.map((branch, index) => (
-        <div
-          key={branch._id}
-          onClick={() => onSelect(branch._id)}
-          style={{
-            padding: "8px",
-            marginBottom: "5px",
-            cursor: "pointer",
-            background:
-              branch._id === activeNodeId ? "#ddd" : "transparent",
-            borderRadius: "4px",
-          }}
-        >
-          {index === 0 ? "Main" : `Branch ${index}`}
-        </div>
-      ))}
+  branches.forEach((b) => {
+    if (b.parentBranchId) {
+      map[b.parentBranchId]?.children.push(map[b._id]);
+    } else {
+      roots.push(map[b._id]);
+    }
+  });
+
+  const renderNode = (node, level = 0) => (
+    <div key={node._id}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          paddingLeft: `${level * 12}px`,
+          cursor: "pointer",
+          background:
+            node._id === activeBranchId ? "#ddd" : "transparent",
+        }}
+        onClick={() => onSelect(node._id)}
+      >
+        Branch
+      </div>
+
+      {node.children.map((child) =>
+        renderNode(child, level + 1)
+      )}
     </div>
   );
+
+  return <div>{roots.map(renderNode)}</div>;
 };
 
 export default Sidebar;

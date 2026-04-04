@@ -3,7 +3,7 @@ import connectDB from "./config/db.js";
 import express from "express";
 import chatRoutes from "./routes/chatRoutes.js";
 import cors from "cors";
-
+import branchRoutes from "./routes/branchRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.get("/test", (_req, res) => {
 });
 
 app.use("/api/chat", chatRoutes);
+app.use("/branches", branchRoutes);
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });

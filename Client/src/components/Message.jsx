@@ -1,4 +1,6 @@
-const Message = ({ msg, onSelect, isActive }) => {
+import { createBranch } from "../services/api";
+
+const Message = ({ msg, onSelect, isActive, activeBranchId, onBranchCreate }) => {
   return (
     <div
       onClick={() => onSelect(msg._id)}
@@ -13,9 +15,14 @@ const Message = ({ msg, onSelect, isActive }) => {
       <p>{msg.content}</p>
 
       <button
-        onClick={(e) => {
-          e.stopPropagation(); // prevent parent click
-          onSelect(msg._id);
+        onClick={async (e) => {
+          e.stopPropagation();
+
+          const newBranch = await createBranch(activeBranchId, msg._id);
+
+          if (onBranchCreate) {
+            onBranchCreate(newBranch); // pass up
+          }
         }}
       >
         New Branch
