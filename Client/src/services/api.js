@@ -11,3 +11,8 @@ export const sendMessage = async (content, parentId) => {
 
   return res.json();
 };
+
+export const fetchMessages = async () => {
+  const res = await fetch("http://localhost:5000/chat");
+  return res.json();
+};
