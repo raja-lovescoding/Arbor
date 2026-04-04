@@ -5,6 +5,7 @@ import { sendMessage } from "../services/api";
 import { getPath } from "../utils/getpath";
 import { useEffect } from "react";
 import { fetchMessages } from "../services/api";
+import Sidebar from "./Sidebar";
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState([]);
@@ -44,7 +45,11 @@ const visibleMessages = activeNodeId
   return (
     <div style={{ padding: "20px" }}>
       <h2>ConceptTree Chat</h2>
-
+    <Sidebar
+        messages={messages}
+        onSelect={setActiveNodeId}
+        activeNodeId={activeNodeId}
+      />
     <div>
       {visibleMessages.map((msg) => (
         <Message
