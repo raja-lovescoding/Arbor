@@ -17,8 +17,10 @@ const Message = ({ msg, onSelect, isActive, activeBranchId, onBranchCreate }) =>
       <button
         onClick={async (e) => {
           e.stopPropagation();
-
-          const newBranch = await createBranch(activeBranchId, msg._id);
+          const newBranch = await createBranch(
+            activeBranchId || null,
+            msg._id
+          );
 
           if (onBranchCreate) {
             onBranchCreate(newBranch); // pass up
@@ -30,5 +32,4 @@ const Message = ({ msg, onSelect, isActive, activeBranchId, onBranchCreate }) =>
     </div>
   );
 };
-
 export default Message;

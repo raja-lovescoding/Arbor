@@ -1,5 +1,3 @@
-import { getBranches } from "../utils/getBranches";
-
 const Sidebar = ({ branches, onSelect, activeBranchId }) => {
   const map = {};
   const roots = [];
@@ -19,26 +17,30 @@ const Sidebar = ({ branches, onSelect, activeBranchId }) => {
   const renderNode = (node, level = 0) => (
     <div key={node._id}>
       <div
+        onClick={() => onSelect(node._id)}
         style={{
-          display: "flex",
-          alignItems: "center",
           paddingLeft: `${level * 12}px`,
           cursor: "pointer",
           background:
             node._id === activeBranchId ? "#ddd" : "transparent",
         }}
-        onClick={() => onSelect(node._id)}
       >
-        Branch
+        {`Branch ${node._id.slice(-4)}`}
       </div>
 
-      {node.children.map((child) =>
-        renderNode(child, level + 1)
-      )}
+      {node.children.length > 0 &&
+        node.children.map((child) =>
+          renderNode(child, level + 1)
+        )}
     </div>
   );
 
-  return <div>{roots.map(renderNode)}</div>;
+  return (
+    <div style={{ width: "250px", borderRight: "1px solid #ccc" }}>
+      <h3>Branches</h3>
+      {roots.map((root) => renderNode(root))}
+    </div>
+  );
 };
 
 export default Sidebar;

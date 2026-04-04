@@ -11,78 +11,103 @@ const ChatWindow = () => {
   const [activeNodeId, setActiveNodeId] = useState(null);
   const [branches, setBranches] = useState([]);
   const [activeBranchId, setActiveBranchId] = useState(null);
+
   useEffect(() => {
-  const loadBranches = async () => {
-    const data = await fetchBranches();
-    setBranches(data);
+    const loadData = async () => {
+      const [branchData, messageData] = await Promise.all([
+        fetchBranches(),
+        fetchMessages(),
+      ]);
 
-    if (data.length > 0) {
-      setActiveBranchId(data[0]._id);
-    }
-  };
+      const safeBranches = Array.isArray(branchData) ? branchData : [];
+      const safeMessages = Array.isArray(messageData) ? messageData : [];
 
-  loadBranches();
-}, []);
+      setBranches(safeBranches);
+      setMessages(safeMessages);
+
+      if (safeBranches.length > 0) {
+        const latestBranch = safeBranches[safeBranches.length - 1];
+        setActiveBranchId(latestBranch._id);
+        setActiveNodeId(latestBranch.lastMessageId || null);
+        return;
+      }
+
+      if (safeMessages.length > 0) {
+        setActiveNodeId(safeMessages[safeMessages.length - 1]._id);
+      }
+    };
+
+    loadData();
+  }, []);
+
   useEffect(() => {
-  const loadMessages = async () => {
-    const data = await fetchMessages();
-    setMessages(data);
+  if (!activeBranchId) return;
 
-    if (data.length > 0) {
-      setActiveNodeId(data[data.length - 1]._id);
-    }
-  };
+  const branch = branches.find(b => b._id === activeBranchId);
 
-  loadMessages();
-}, []);
+  if (branch) {
+    setActiveNodeId(branch.lastMessageId);
+  }
+}, [activeBranchId, branches]);
 
   const handleSend = async (text) => {
-    const data = await sendMessage(text, activeNodeId);
+    const data = await sendMessage(text, activeNodeId, activeBranchId);
 
-    const newMessages = [
-      ...messages,
-      data.user,
-      data.assistant,
-    ];
-
-    setMessages(newMessages);
-
-    // move active node to latest AI message
+    setMessages((prev) => [...prev, data.user, data.assistant]);
     setActiveNodeId(data.assistant._id);
+
+    if (data.branch?._id) {
+      setActiveBranchId(data.branch._id);
+      setBranches((prev) => {
+        const hasExisting = prev.some((b) => b._id === data.branch._id);
+
+        if (hasExisting) {
+          return prev.map((b) =>
+            b._id === data.branch._id ? { ...b, ...data.branch } : b
+          );
+        }
+
+        return [...prev, data.branch];
+      });
+    }
   };
 
-const visibleMessages = activeNodeId
-  ? getPath(messages, activeNodeId)
-  : messages;
+  const visibleMessages = activeNodeId ? getPath(messages, activeNodeId) : messages;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>ConceptTree Chat</h2>
+  <div style={{ display: "flex" }}>
+    
     <Sidebar
       branches={branches}
       onSelect={setActiveBranchId}
       activeBranchId={activeBranchId}
     />
-    <div>
-      {visibleMessages.map((msg) => (
-      <Message
-        key={msg._id}
-        msg={msg}
-        onSelect={setActiveNodeId}
-        isActive={msg._id === activeNodeId}
-        activeBranchId={activeBranchId}
-        onBranchCreate={(branch) => {
-        setBranches((prev) => [...prev, branch]);
-        setActiveBranchId(branch._id);
-        setActiveNodeId(branch.lastMessageId);
-        }}
-      />
-      ))}
-    </div>
+
+    <div style={{ flex: 1, padding: "20px" }}>
+      <h2>ConceptTree Chat</h2>
+
+      <div>
+        {visibleMessages.map((msg) => (
+          <Message
+            key={msg._id}
+            msg={msg}
+            onSelect={setActiveNodeId}
+            isActive={msg._id === activeNodeId}
+            activeBranchId={activeBranchId}
+            onBranchCreate={(branch) => {
+              setBranches((prev) => [...prev, branch]);
+              setActiveBranchId(branch._id);
+              setActiveNodeId(branch.lastMessageId);
+            }}
+          />
+        ))}
+      </div>
 
       <InputBox onSend={handleSend} />
     </div>
-  );
+
+  </div>
+);
 };
 
 export default ChatWindow;

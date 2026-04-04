@@ -1,12 +1,12 @@
 const API_BASE = "http://localhost:5000";
 
-export const sendMessage = async (content, parentId) => {
+export const sendMessage = async (content, parentId, branchId) => {
   const res = await fetch(`${API_BASE}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ content, parentId }),
+    body: JSON.stringify({ content, parentId, branchId }),
   });
 
   return res.json();
