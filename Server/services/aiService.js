@@ -1,6 +1,6 @@
-const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 const FALLBACK_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash-latest"];
-const ALLOW_LOCAL_FALLBACK = process.env.ALLOW_LOCAL_AI_FALLBACK !== "false";
+const MAX_CONTEXT_MESSAGES = 8;
+const MAX_MESSAGE_CHARS = 500;
 
 const isModelNotFoundError = (message) => {
   if (!message) return false;
@@ -27,6 +27,16 @@ const buildLocalFallbackReply = (messages) => {
   }
 
   return `Gemini quota is currently unavailable, so local fallback is active. You said: "${latestUser}".`;
+};
+
+const normalizeContextMessages = (messages) => {
+  const list = Array.isArray(messages) ? messages : [];
+  return list
+    .slice(-MAX_CONTEXT_MESSAGES)
+    .map((msg) => ({
+      role: msg?.role === "assistant" ? "assistant" : "user",
+      content: String(msg?.content || "").slice(0, MAX_MESSAGE_CHARS),
+    }));
 };
 
 const generateWithModel = async (modelName, apiKey, prompt) => {
@@ -73,12 +83,16 @@ const generateWithModel = async (modelName, apiKey, prompt) => {
 
 export const getAIResponse = async (messages) => {
   const apiKey = process.env.GEMINI_API_KEY;
+  const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const allowLocalFallback = process.env.ALLOW_LOCAL_AI_FALLBACK !== "false";
 
   if (!apiKey) {
     throw new Error("Missing GEMINI_API_KEY in environment");
   }
 
-  const chatTranscript = (Array.isArray(messages) ? messages : [])
+  const scopedMessages = normalizeContextMessages(messages);
+
+  const chatTranscript = scopedMessages
     .map((msg) => `${msg.role === "assistant" ? "Assistant" : "User"}: ${msg.content}`)
     .join("\n");
 
@@ -90,7 +104,7 @@ export const getAIResponse = async (messages) => {
     "Assistant:",
   ].join("\n\n");
 
-  const modelsToTry = [MODEL_NAME, ...FALLBACK_MODELS.filter((m) => m !== MODEL_NAME)];
+  const modelsToTry = [modelName, ...FALLBACK_MODELS.filter((m) => m !== modelName)];
   let lastError = null;
 
   for (const model of modelsToTry) {
@@ -99,7 +113,7 @@ export const getAIResponse = async (messages) => {
     } catch (err) {
       lastError = err;
 
-      if (ALLOW_LOCAL_FALLBACK && isQuotaOrRateLimitError(err?.message)) {
+      if (allowLocalFallback && isQuotaOrRateLimitError(err?.message)) {
         return buildLocalFallbackReply(messages);
       }
 
