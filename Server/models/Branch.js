@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const branchSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      default: "New Branch",
+      trim: true,
+    },
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversation",

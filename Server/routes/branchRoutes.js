@@ -1,12 +1,13 @@
 import express from "express";
 import Branch from "../models/Branch.js";
+import { getBranchTitle } from "../utils/titleUtils.js";
 
 const router = express.Router();
 
 // create new branch
 router.post("/", async (req, res) => {
   try {
-    const { parentBranchId, lastMessageId, conversationId } = req.body;
+    const { parentBranchId, lastMessageId, conversationId, title } = req.body;
 
     if (!conversationId) {
       return res.status(400).json({ error: "conversationId is required" });
@@ -15,6 +16,7 @@ router.post("/", async (req, res) => {
     const branch = await Branch.create({
       conversationId,
       parentBranchId: parentBranchId || null,
+      title: title?.trim() || getBranchTitle(""),
       lastMessageId,
     });
 

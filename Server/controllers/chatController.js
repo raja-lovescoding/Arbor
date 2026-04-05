@@ -3,6 +3,7 @@ import { buildContext } from "../utils/buildContext.js";
 import { getAIResponse } from "../services/aiService.js";
 import Branch from "../models/Branch.js";
 import Conversation from "../models/Conversation.js";
+import { getBranchTitle, getConversationTitle, isDefaultBranchTitle, isDefaultConversationTitle } from "../utils/titleUtils.js";
 
 export const createMessage = async (req, res) => {
   try {
@@ -49,13 +50,25 @@ export const createMessage = async (req, res) => {
       branch = await Branch.create({
         conversationId,
         parentBranchId: null,
+        title: getBranchTitle(userMsg.content),
         lastMessageId: aiMsg._id,
       });
+    } else if (isDefaultBranchTitle(branch.title)) {
+      branch.title = getBranchTitle(userMsg.content);
+      await branch.save();
     }
 
-    await Conversation.findByIdAndUpdate(conversationId, {
-      lastMessageId: aiMsg._id,
-    });
+    const conversation = await Conversation.findById(conversationId);
+
+    if (conversation) {
+      conversation.lastMessageId = aiMsg._id;
+
+      if (isDefaultConversationTitle(conversation.title)) {
+        conversation.title = getConversationTitle(userMsg.content);
+      }
+
+      await conversation.save();
+    }
 
     res.status(201).json({
       user: userMsg,
