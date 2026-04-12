@@ -223,16 +223,17 @@ const ChatWindow = () => {
   const visibleMessages = activeNodeId ? getPath(messages, activeNodeId) : messages;
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <ConversationSidebar
         conversations={conversations}
         activeConversationId={activeConversationId}
         onSelect={setActiveConversationId}
         onCreate={handleCreateConversation}
         onDeleteConversation={handleDeleteConversation}
+        style={{ width: "260px" }}
       />
 
-      <div style={{ flex: 1, padding: "20px" }}>
+      <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
         <h2>ConceptTree Chat</h2>
         {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
 
@@ -275,6 +276,7 @@ const ChatWindow = () => {
         onSelect={setActiveBranchId}
         activeBranchId={activeBranchId}
         onDeleteBranch={handleDeleteBranch}
+        style={{ width: "280px" , overflowY: "hidden"}}
       />
     </div>
   );

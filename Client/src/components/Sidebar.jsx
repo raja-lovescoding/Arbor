@@ -1,4 +1,4 @@
-const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch }) => {
+const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) => {
   const map = {};
   const roots = [];
 
@@ -20,13 +20,19 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch }) => {
         onClick={() => onSelect(node._id)}
         style={{
           paddingLeft: `${level * 12}px`,
+          paddingTop: "7px",
+          paddingBottom: "7px",
           cursor: "pointer",
           background:
-            node._id === activeBranchId ? "#ddd" : "transparent",
+            node._id === activeBranchId ? "#e2e8f0" : "#f8fafc",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: "8px",
+          border: "1px solid #e5e7eb",
+          borderRadius: "6px",
+          marginBottom: "5px",
+          color: "#1f2937",
         }}
       >
         <span>{node.title || `Branch ${node._id.slice(-4)}`}</span>
@@ -53,7 +59,17 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch }) => {
   );
 
   return (
-    <div style={{ width: "250px", borderLeft: "1px solid #ccc" }}>
+    <div
+      style={{
+        width: "250px",
+        borderLeft: "1px solid #d7dce5",
+        padding: "12px",
+        boxSizing: "border-box",
+        background: "#f3f4f6",
+        overflow: "hidden",
+        ...style,
+      }}
+    >
       <h3>Branches</h3>
       {roots.map((root) => renderNode(root))}
     </div>
