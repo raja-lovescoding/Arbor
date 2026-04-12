@@ -23,6 +23,7 @@ const ChatWindow = () => {
   const [branches, setBranches] = useState([]);
   const [activeBranchId, setActiveBranchId] = useState(null);
   const [error, setError] = useState("");
+  const [isAIloading, setIsAILoading] = useState(false);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -106,15 +107,32 @@ const ChatWindow = () => {
       return;
     }
 
+    const currentActiveNodeId = activeNodeId;
+
+    const tempUserMessage = {
+      _id: `temp-user-${Date.now()}`,
+      role: "user",
+      content: text,
+      parentId: currentActiveNodeId || null,
+    };
+
+    setMessages((prev) => [...prev, tempUserMessage]);
+    setActiveNodeId(tempUserMessage._id);
+    setIsAILoading(true);
+    setError("");
+
     try {
       const data = await sendMessage(
         text,
-        activeNodeId,
+        currentActiveNodeId,
         activeBranchId,
         activeConversationId
       );
 
-      setMessages((prev) => [...prev, data.user, data.assistant]);
+      setMessages((prev) => {
+        const withoutTemp = prev.filter((msg) => msg._id !== tempUserMessage._id);
+        return [...withoutTemp, data.user, data.assistant];
+      });
       setActiveNodeId(data.assistant._id);
 
       if (data.branch?._id) {
@@ -139,9 +157,10 @@ const ChatWindow = () => {
             : conversation
         )
       );
-      setError("");
     } catch (err) {
       setError(err.message || "Failed to send message");
+    } finally {
+      setIsAILoading(false);
     }
   };
 
@@ -233,6 +252,19 @@ const ChatWindow = () => {
               }}
             />
           ))}
+          {isAIloading ? (
+            <div
+              style={{
+                margin: "10px 0",
+                padding: "10px",
+                border: "1px solid gray",
+                fontStyle: "italic",
+                color: "#555",
+              }}
+            >
+              Loading respoinse...
+            </div>
+          ) : null}
         </div>
 
         <InputBox onSend={handleSend} />
