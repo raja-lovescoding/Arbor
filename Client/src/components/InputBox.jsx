@@ -10,11 +10,19 @@ const InputBox = ({ onSend }) => {
     console.log("Sending:", input);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div style={{ marginTop: "20px" }}>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="Type a message..."
         style={{ width: "70%", padding: "8px" }}
       />

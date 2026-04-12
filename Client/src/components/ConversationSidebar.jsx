@@ -3,6 +3,7 @@ const ConversationSidebar = ({
   activeConversationId,
   onSelect,
   onCreate,
+  onDeleteConversation
 }) => {
   return (
     <div
@@ -28,9 +29,32 @@ const ConversationSidebar = ({
             background:
               conversation._id === activeConversationId ? "#e9edf8" : "transparent",
             marginBottom: "4px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {conversation.title || "New Chat"}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const ok = window.confirm("Delete this conversation?");
+              if (!ok) {
+                return;
+              }
+              if(onDeleteConversation) {
+                onDeleteConversation(conversation._id);
+              }
+            }}
+            style={{
+              marginLeft: "8px",
+              fontSize: "12px",
+              color: "crimson",
+            }}
+          >
+            Delete
+          </button>
+
         </div>
       ))}
     </div>

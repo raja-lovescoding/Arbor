@@ -1,4 +1,4 @@
-const Sidebar = ({ branches, onSelect, activeBranchId }) => {
+const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch }) => {
   const map = {};
   const roots = [];
 
@@ -23,9 +23,26 @@ const Sidebar = ({ branches, onSelect, activeBranchId }) => {
           cursor: "pointer",
           background:
             node._id === activeBranchId ? "#ddd" : "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "8px",
         }}
       >
-        {`Branch ${node._id.slice(-4)}`}
+        <span>{node.title || `Branch ${node._id.slice(-4)}`}</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const ok = window.confirm("Delete this branch and its child branches?");
+            if (!ok) return;
+            if (onDeleteBranch) {
+              onDeleteBranch(node._id);
+            }
+          }}
+          style={{ fontSize: "12px" }}
+        >
+          Delete
+        </button>
       </div>
 
       {node.children.length > 0 &&

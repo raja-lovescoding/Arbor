@@ -62,3 +62,30 @@ export const fetchBranches = async (conversationId) => {
   if (!res.ok) throw new Error("Failed to fetch branches");
   return res.json();
 };
+
+export const deleteBranch = async (branchId, conversationId) => {
+  const res = await fetch(
+    `${API_BASE}/branches/${branchId}?conversationId=${encodeURIComponent(conversationId)}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    throw new Error(payload.error || "Failed to delete branch");
+  }
+
+  return res.json();
+};
+
+export const deleteConversation = async (conversationId) => {
+  const res = await fetch(`${API_BASE}/conversations/${conversationId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    throw new Error(payload.error || "Failed to delete conversation");
+  }
+  return res.json();
+};

@@ -3,6 +3,8 @@ import Message from "./Message";
 import InputBox from "./InputBox";
 import {
   createConversation,
+  deleteBranch,
+  deleteConversation,
   fetchBranches,
   fetchConversations,
   fetchMessages,
@@ -143,6 +145,62 @@ const ChatWindow = () => {
     }
   };
 
+  const handleDeleteBranch = async (branchId) => {
+    if (!activeConversationId) {
+      return;
+    }
+
+    try {
+      const result = await deleteBranch(branchId, activeConversationId);
+      const deletedIdSet = new Set((result?.deletedIds || []).map((id) => String(id)));
+      const remainingBranches = branches.filter(
+        (branch) => !deletedIdSet.has(String(branch._id))
+      );
+
+      setBranches(remainingBranches);
+
+      if (deletedIdSet.has(String(activeBranchId))) {
+        if (remainingBranches.length > 0) {
+          const nextActiveBranch = remainingBranches[remainingBranches.length - 1];
+          setActiveBranchId(nextActiveBranch._id);
+          setActiveNodeId(nextActiveBranch.lastMessageId || null);
+        } else {
+          setActiveBranchId(null);
+          setActiveNodeId(messages.length > 0 ? messages[messages.length - 1]._id : null);
+        }
+      }
+
+      setError("");
+    } catch (err) {
+      setError(err.message || "Failed to delete branch");
+    }
+  };
+
+  const handleDeleteConversation = async (conversationId) => {
+    try {
+      await deleteConversation(conversationId);
+      const newConversations = conversations.filter(
+        (c) => c._id !== conversationId
+      );
+      setConversations(newConversations);
+
+      if (activeConversationId === conversationId) {
+        if (newConversations.length > 0) {
+          const deletedIndex = conversations.findIndex(
+            (c) => c._id === conversationId
+          );
+          const newActiveIndex = Math.max(0, deletedIndex - 1);
+          setActiveConversationId(newConversations[newActiveIndex]._id);
+        } else {
+          setActiveConversationId(null);
+        }
+      }
+      setError("");
+    } catch (err) {
+      setError(err.message || "Failed to delete conversation");
+    }
+  };
+
   const visibleMessages = activeNodeId ? getPath(messages, activeNodeId) : messages;
 
   return (
@@ -152,6 +210,7 @@ const ChatWindow = () => {
         activeConversationId={activeConversationId}
         onSelect={setActiveConversationId}
         onCreate={handleCreateConversation}
+        onDeleteConversation={handleDeleteConversation}
       />
 
       <div style={{ flex: 1, padding: "20px" }}>
@@ -183,6 +242,7 @@ const ChatWindow = () => {
         branches={branches}
         onSelect={setActiveBranchId}
         activeBranchId={activeBranchId}
+        onDeleteBranch={handleDeleteBranch}
       />
     </div>
   );
