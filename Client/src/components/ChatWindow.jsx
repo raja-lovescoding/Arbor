@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Message from "./Message";
 import InputBox from "./InputBox";
 import {
@@ -11,7 +11,6 @@ import {
   sendMessage,
 } from "../services/api";
 import { getPath } from "../utils/getpath";
-import { useEffect } from "react";
 import Sidebar from "./Sidebar";
 import ConversationSidebar from "./ConversationSidebar";
 
@@ -24,6 +23,9 @@ const ChatWindow = () => {
   const [activeBranchId, setActiveBranchId] = useState(null);
   const [error, setError] = useState("");
   const [isAIloading, setIsAILoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState(null);
+  const streamTimerRef = useRef(null);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -87,6 +89,25 @@ const ChatWindow = () => {
     }
   }, [activeBranchId, branches]);
 
+  const clearStreamingTimer = () => {
+    if (streamTimerRef.current) {
+      clearInterval(streamTimerRef.current);
+      streamTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      clearStreamingTimer();
+    };
+  }, []);
+
+  useEffect(() => {
+    clearStreamingTimer();
+    setIsStreaming(false);
+    setStreamingMessageId(null);
+  }, [activeConversationId]);
+
   const handleCreateConversation = async () => {
     try {
       const conversation = await createConversation();
@@ -102,10 +123,42 @@ const ChatWindow = () => {
     }
   };
 
+  const streamAssistantMessage = (assistantMessageId, fullText) => {
+    clearStreamingTimer();
+
+    const text = typeof fullText === "string" ? fullText : "";
+    let index = 0;
+
+    setIsStreaming(true);
+    setStreamingMessageId(assistantMessageId);
+
+    streamTimerRef.current = setInterval(() => {
+      const chunk = Math.floor(Math.random() * 7) + 1;
+      index = Math.min(index + chunk, text.length);
+      const nextText = text.slice(0, index);
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === assistantMessageId ? { ...msg, content: nextText } : msg
+        )
+      );
+
+      if (index >= text.length) {
+        clearStreamingTimer();
+        setIsStreaming(false);
+        setStreamingMessageId(null);
+      }
+    }, 28);
+  };
+
   const handleSend = async (text) => {
     if (!activeConversationId) {
       return;
     }
+
+    clearStreamingTimer();
+    setIsStreaming(false);
+    setStreamingMessageId(null);
 
     const currentActiveNodeId = activeNodeId;
 
@@ -129,11 +182,22 @@ const ChatWindow = () => {
         activeConversationId
       );
 
+      const assistantMessageId = data?.assistant?._id;
+
       setMessages((prev) => {
         const withoutTemp = prev.filter((msg) => msg._id !== tempUserMessage._id);
-        return [...withoutTemp, data.user, data.assistant];
+        return [
+          ...withoutTemp,
+          data.user,
+          {
+            ...data.assistant,
+            content: "",
+          },
+        ];
       });
-      setActiveNodeId(data.assistant._id);
+      setActiveNodeId(assistantMessageId);
+      setIsAILoading(false);
+      streamAssistantMessage(assistantMessageId, data.assistant.content);
 
       if (data.branch?._id) {
         setActiveBranchId(data.branch._id);
@@ -153,11 +217,15 @@ const ChatWindow = () => {
       setConversations((prev) =>
         prev.map((conversation) =>
           conversation._id === activeConversationId
-            ? { ...conversation, lastMessageId: data.assistant._id }
+            ? { ...conversation, lastMessageId: assistantMessageId }
             : conversation
         )
       );
     } catch (err) {
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempUserMessage._id));
+      clearStreamingTimer();
+      setIsStreaming(false);
+      setStreamingMessageId(null);
       setError(err.message || "Failed to send message");
     } finally {
       setIsAILoading(false);
@@ -233,16 +301,15 @@ const ChatWindow = () => {
         style={{ width: "260px" }}
       />
 
-      <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
-        <h2>ConceptTree Chat</h2>
+      <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <h2>Branhed GPT</h2>
         {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
 
-        <div>
+        <div style={{ flex: 1, overflowY: "auto", paddingBottom: "10px" }}>
           {visibleMessages.map((msg) => (
             <Message
               key={msg._id}
               msg={msg}
-              onSelect={setActiveNodeId}
               isActive={msg._id === activeNodeId}
               activeBranchId={activeBranchId}
               activeConversationId={activeConversationId}
@@ -266,9 +333,22 @@ const ChatWindow = () => {
               Loading respoinse...
             </div>
           ) : null}
+          {isStreaming && streamingMessageId ? (
+            <div style={{ fontSize: "12px", color: "#64748b", marginTop: "6px" }}>
+              AI is typing...
+            </div>
+          ) : null}
         </div>
-
-        <InputBox onSend={handleSend} />
+        <div
+          style={{
+            position: "sticky",
+            bottom: 0,
+            paddingTop: "10px",
+            background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 28%)",
+          }}
+        >
+          <InputBox onSend={handleSend} />
+        </div>
       </div>
 
       <Sidebar

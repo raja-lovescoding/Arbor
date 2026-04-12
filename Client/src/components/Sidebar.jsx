@@ -14,7 +14,7 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) 
     }
   });
 
-  const renderNode = (node, level = 0) => (
+  const renderNode = (node, level = 1) => (
     <div key={node._id}>
       <div
         onClick={() => onSelect(node._id)}

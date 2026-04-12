@@ -45,14 +45,24 @@ const ConversationSidebar = ({
             background:
               conversation._id === activeConversationId ? "#e2e8f0" : "#f8fafc",
             marginBottom: "4px",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
             border: "1px solid #e5e7eb",
             color: "#1f2937",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          {conversation.title || "New Chat"}
+          <span
+            style={{
+              minWidth: 0,
+              flex: 1,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {conversation.title || "New Chat"}
+          </span>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -65,12 +75,12 @@ const ConversationSidebar = ({
               }
             }}
             style={{
-              marginLeft: "8px",
               fontSize: "12px",
               color: "crimson",
               border: "none",
               background: "transparent",
               cursor: "pointer",
+              flexShrink: 0,
             }}
           >
             Delete

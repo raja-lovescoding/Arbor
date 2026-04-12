@@ -18,15 +18,15 @@ const InputBox = ({ onSend }) => {
   };
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type a message..."
-        style={{ width: "70%", padding: "8px" }}
+        style={{ flex: 1, padding: "10px", border: "1px solid #cbd5e1", borderRadius: "6px" }}
       />
-      <button onClick={handleSend} style={{ marginLeft: "10px" }}>
+      <button onClick={handleSend}>
         Send
       </button>
     </div>
