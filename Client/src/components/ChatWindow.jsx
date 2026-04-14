@@ -13,6 +13,8 @@ import {
 import { getPath } from "../utils/getpath";
 import Sidebar from "./Sidebar";
 import ConversationSidebar from "./ConversationSidebar";
+import Header from "./Header";
+import Footer from "./Footer";
 
 const ChatWindow = () => {
   const [conversations, setConversations] = useState([]);
@@ -291,73 +293,73 @@ const ChatWindow = () => {
   const visibleMessages = activeNodeId ? getPath(messages, activeNodeId) : messages;
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <ConversationSidebar
-        conversations={conversations}
-        activeConversationId={activeConversationId}
-        onSelect={setActiveConversationId}
-        onCreate={handleCreateConversation}
-        onDeleteConversation={handleDeleteConversation}
-        style={{ width: "260px" }}
-      />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+      <Header />
 
-      <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <h2>Branhed GPT</h2>
-        {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
+      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <ConversationSidebar
+          conversations={conversations}
+          activeConversationId={activeConversationId}
+          onSelect={setActiveConversationId}
+          onCreate={handleCreateConversation}
+          onDeleteConversation={handleDeleteConversation}
+          style={{ width: "260px" }}
+        />
 
-        <div style={{ flex: 1, overflowY: "auto", paddingBottom: "10px" }}>
-          {visibleMessages.map((msg) => (
-            <Message
-              key={msg._id}
-              msg={msg}
-              isActive={msg._id === activeNodeId}
-              activeBranchId={activeBranchId}
-              activeConversationId={activeConversationId}
-              onBranchCreate={(branch) => {
-                setBranches((prev) => [...prev, branch]);
-                setActiveBranchId(branch._id);
-                setActiveNodeId(branch.lastMessageId);
-              }}
-            />
-          ))}
-          {isAIloading ? (
-            <div
-              style={{
-                margin: "10px 0",
-                padding: "10px",
-                border: "1px solid gray",
-                fontStyle: "italic",
-                color: "#555",
-              }}
-            >
-              Loading respoinse...
-            </div>
-          ) : null}
-          {isStreaming && streamingMessageId ? (
-            <div style={{ fontSize: "12px", color: "#64748b", marginTop: "6px" }}>
-              AI is typing...
-            </div>
-          ) : null}
+        <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <h2 className="conversation-title">
+            {conversations.find((c) => c._id === activeConversationId)?.title || "Conversation"}
+          </h2>
+          {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
+
+          <div style={{ flex: 1, overflowY: "auto", paddingBottom: "10px" }}>
+            {visibleMessages.map((msg) => (
+              <Message
+                key={msg._id}
+                msg={msg}
+                isActive={msg._id === activeNodeId}
+                activeBranchId={activeBranchId}
+                activeConversationId={activeConversationId}
+                onBranchCreate={(branch) => {
+                  setBranches((prev) => [...prev, branch]);
+                  setActiveBranchId(branch._id);
+                  setActiveNodeId(branch.lastMessageId);
+                }}
+              />
+            ))}
+            {isAIloading ? (
+              <div
+                style={{
+                  margin: "10px 0",
+                  padding: "10px",
+                  border: "1px solid gray",
+                  fontStyle: "italic",
+                  color: "#555",
+                }}
+              >
+                Loading respoinse...
+              </div>
+            ) : null}
+            {isStreaming && streamingMessageId ? (
+              <div style={{ fontSize: "12px", color: "#64748b", marginTop: "6px" }}>
+                AI is typing...
+              </div>
+            ) : null}
+          </div>
+          <div style={{ paddingTop: "10px", background: "#ffffff" }}>
+            <InputBox onSend={handleSend} />
+          </div>
         </div>
-        <div
-          style={{
-            position: "sticky",
-            bottom: 0,
-            paddingTop: "10px",
-            background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 28%)",
-          }}
-        >
-          <InputBox onSend={handleSend} />
-        </div>
+
+        <Sidebar
+          branches={branches}
+          onSelect={setActiveBranchId}
+          activeBranchId={activeBranchId}
+          onDeleteBranch={handleDeleteBranch}
+          style={{ width: "360px" , overflowY: "hidden"}}
+        />
       </div>
-
-      <Sidebar
-        branches={branches}
-        onSelect={setActiveBranchId}
-        activeBranchId={activeBranchId}
-        onDeleteBranch={handleDeleteBranch}
-        style={{ width: "280px" , overflowY: "hidden"}}
-      />
+      <Footer />
     </div>
   );
 };

@@ -13,3 +13,139 @@ body {
 * {
   box-sizing: border-box;
 }
+.header {
+  background-color: #ffffff;
+  padding: 3px 20px;
+  color: #000;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+}
+.header__center {
+  flex: 1;         /* Takes remaining space, center section grows */
+  display: flex;
+  justify-content: center;
+}
+
+.header__right {
+  flex: 0 0 auto;  /* Fixed width, doesn't expand */
+  display: flex;
+  gap: 10px;
+  border: #951b1b solid 1px;
+  border-radius: 6px;
+}
+
+.header__left {
+  flex: 0 0 auto;  /* Fixed width, doesn't expand */
+}
+
+.conversation-title {
+  font-family: "Arial, sans-serif";
+  margin: 0;
+  padding: 1px 10px;
+  background-color: rgb(225, 225, 225);
+  border-radius: 10px;
+}
+
+.footer {
+  background-color: #ffffff;
+  padding: 10px 20px;
+  color: #000;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #ddd;
+  font-size: smaller;
+}
+
+.footer-left {
+  flex: 0 0 auto;  /* Fixed width, doesn't expand */
+}
+.footer-right {
+  flex: 0 0 auto;  /* Fixed width, doesn't expand */
+}
+
+.branch-sidebar {
+  width: 250px;
+  border-left: 1px solid #d7dce5;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #f3f4f6;
+  overflow: auto;
+}
+
+.branch-node {
+  position: relative;
+  margin-left: calc((var(--branch-level) - 1) * 10px);
+  padding-left: 14px;
+}
+
+.branch-node::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  background: #cbd5e1;
+}
+
+.branch-node::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  border-left: 2px solid #cbd5e1;
+  border-bottom: 2px solid #cbd5e1;
+  border-bottom-left-radius: 8px;
+}
+
+.branch-node--root::before {
+  display: none;
+}
+
+.branch-node--root::after {
+  display: none;
+}
+
+.branch-node--last::before {
+  bottom: calc(100% - 16px);
+}
+
+.branch-item {
+  position: relative;
+  padding: 7px 10px;
+  cursor: pointer;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  color: #1f2937;
+}
+
+.branch-item.is-active {
+  background: #e2e8f0;
+}
+
+.branch-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-delete {
+  font-size: 12px;
+}
+
+.branch-children {
+  margin-top: 2px;
+}

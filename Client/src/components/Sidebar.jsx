@@ -14,28 +14,17 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) 
     }
   });
 
-  const renderNode = (node, level = 1) => (
-    <div key={node._id}>
+  const renderNode = (node, level = 1, isLast = false) => (
+    <div
+      key={node._id}
+      className={`branch-node ${level === 1 ? "branch-node--root" : ""} ${isLast ? "branch-node--last" : ""}`}
+      style={{ "--branch-level": level }}
+    >
       <div
         onClick={() => onSelect(node._id)}
-        style={{
-          paddingLeft: `${level * 12}px`,
-          paddingTop: "7px",
-          paddingBottom: "7px",
-          cursor: "pointer",
-          background:
-            node._id === activeBranchId ? "#e2e8f0" : "#f8fafc",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "8px",
-          border: "1px solid #e5e7eb",
-          borderRadius: "6px",
-          marginBottom: "5px",
-          color: "#1f2937",
-        }}
+        className={`branch-item ${node._id === activeBranchId ? "is-active" : ""}`}
       >
-        <span>{node.title || `Branch ${node._id.slice(-4)}`}</span>
+        <span className="branch-title">{node.title || `Branch ${node._id.slice(-4)}`}</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -45,33 +34,31 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) 
               onDeleteBranch(node._id);
             }
           }}
-          style={{ fontSize: "12px" }}
+          className="branch-delete"
         >
           Delete
         </button>
       </div>
 
-      {node.children.length > 0 &&
-        node.children.map((child) =>
-          renderNode(child, level + 1)
-        )}
+      {node.children.length > 0 ? (
+        <div className="branch-children">
+          {node.children.map((child, index) =>
+            renderNode(child, level + 1, index === node.children.length - 1)
+          )}
+        </div>
+      ) : null}
     </div>
   );
 
   return (
     <div
+      className="branch-sidebar"
       style={{
-        width: "250px",
-        borderLeft: "1px solid #d7dce5",
-        padding: "12px",
-        boxSizing: "border-box",
-        background: "#f3f4f6",
-        overflow: "hidden",
         ...style,
       }}
     >
       <h3>Branches</h3>
-      {roots.map((root) => renderNode(root))}
+      {roots.map((root, index) => renderNode(root, 1, index === roots.length - 1))}
     </div>
   );
 };

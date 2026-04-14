@@ -18,7 +18,7 @@ const InputBox = ({ onSend }) => {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingTop: "10px", borderTop: "1px solid #e5e7eb", background: "#f8fafc" }}>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
