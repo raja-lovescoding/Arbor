@@ -1,7 +1,30 @@
 const API_BASE = "http://localhost:5000";
 
+let authToken = null;
+
+export const setAuthToken = (token) => {
+  authToken = token || null;
+};
+
+export const clearAuthToken = () => {
+  authToken = null;
+};
+
+const buildHeaders = (headers = {}) => {
+  if (!authToken) {
+    return headers;
+  }
+
+  return {
+    ...headers,
+    Authorization: `Bearer ${authToken}`,
+  };
+};
+
 export const fetchConversations = async () => {
-  const res = await fetch(`${API_BASE}/conversations`);
+  const res = await fetch(`${API_BASE}/conversations`, {
+    headers: buildHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch conversations");
   return res.json();
 };
@@ -11,6 +34,7 @@ export const createConversation = async (title = "New Chat") => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...buildHeaders(),
     },
     body: JSON.stringify({ title }),
   });
@@ -25,6 +49,7 @@ export const sendMessage = async (content, parentId, branchId, conversationId) =
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...buildHeaders(),
     },
     body: JSON.stringify({ content, parentId, branchId, conversationId }),
   });
@@ -38,7 +63,9 @@ export const sendMessage = async (content, parentId, branchId, conversationId) =
 };
 
 export const fetchMessages = async (conversationId) => {
-  const res = await fetch(`${API_BASE}/chat?conversationId=${conversationId}`);
+  const res = await fetch(`${API_BASE}/chat?conversationId=${conversationId}`, {
+    headers: buildHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch messages");
   return res.json();
 };
@@ -48,6 +75,7 @@ export const createBranch = async (parentBranchId, lastMessageId, conversationId
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...buildHeaders(),
     },
     body: JSON.stringify({ parentBranchId, lastMessageId, conversationId }),
   });
@@ -58,7 +86,9 @@ export const createBranch = async (parentBranchId, lastMessageId, conversationId
 };
 
 export const fetchBranches = async (conversationId) => {
-  const res = await fetch(`${API_BASE}/branches?conversationId=${conversationId}`);
+  const res = await fetch(`${API_BASE}/branches?conversationId=${conversationId}`, {
+    headers: buildHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch branches");
   return res.json();
 };
@@ -68,6 +98,7 @@ export const deleteBranch = async (branchId, conversationId) => {
     `${API_BASE}/branches/${branchId}?conversationId=${encodeURIComponent(conversationId)}`,
     {
       method: "DELETE",
+      headers: buildHeaders(),
     }
   );
 
@@ -82,6 +113,7 @@ export const deleteBranch = async (branchId, conversationId) => {
 export const deleteConversation = async (conversationId) => {
   const res = await fetch(`${API_BASE}/conversations/${conversationId}`, {
     method: "DELETE",
+    headers: buildHeaders(),
   });
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}));

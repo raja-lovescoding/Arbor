@@ -16,7 +16,7 @@ import ConversationSidebar from "./ConversationSidebar";
 import Header from "./Header";
 import Footer from "./Footer";
 
-const ChatWindow = () => {
+const ChatWindow = ({ user, onLogout }) => {
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -294,7 +294,7 @@ const ChatWindow = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
-      <Header />
+      <Header user={user} onLogout={onLogout} />
 
       <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
         <ConversationSidebar
