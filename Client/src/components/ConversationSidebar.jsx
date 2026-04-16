@@ -38,6 +38,7 @@ const ConversationSidebar = ({
         <div
           key={conversation._id}
           onClick={() => onSelect(conversation._id)}
+          className="conversation-item"
           style={{
             padding: "9px",
             cursor: "pointer",
@@ -64,6 +65,8 @@ const ConversationSidebar = ({
             {conversation.title || "New Chat"}
           </span>
           <button
+            type="button"
+            className="conversation-delete"
             onClick={(e) => {
               e.stopPropagation();
               const ok = window.confirm("Delete this conversation?");

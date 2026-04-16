@@ -208,8 +208,23 @@ body {
 
 .branch-delete {
   font-size: 12px;
+  display: none;
+}
+
+.branch-item:hover .branch-delete,
+.branch-item:focus-within .branch-delete {
+  display: inline-flex;
 }
 
 .branch-children {
   margin-top: 2px;
+}
+
+.conversation-item .conversation-delete {
+  display: none;
+}
+
+.conversation-item:hover .conversation-delete,
+.conversation-item:focus-within .conversation-delete {
+  display: inline-flex;
 }
