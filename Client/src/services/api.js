@@ -121,3 +121,35 @@ export const deleteConversation = async (conversationId) => {
   }
   return res.json();
 };
+
+export const updateConversationTitle = async (conversationId, title) => {
+  const res = await fetch(`${API_BASE}/conversations/${conversationId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildHeaders(),
+    },
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    throw new Error(payload.error || "Failed to update conversation title");
+  }
+  return res.json();
+};
+
+export const updateBranchTitle = async (branchId, title, conversationId) => {
+  const res = await fetch(`${API_BASE}/branches/${branchId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildHeaders(),
+    },
+    body: JSON.stringify({ title, conversationId }),
+  });
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    throw new Error(payload.error || "Failed to update branch title");
+  }
+  return res.json();
+};

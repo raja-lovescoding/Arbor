@@ -295,6 +295,18 @@ const ChatWindow = ({ user, onLogout }) => {
     }
   };
 
+  const handleUpdateConversation = (updated) => {
+    setConversations((prev) =>
+      prev.map((c) => (c._id === updated._id ? updated : c))
+    );
+  };
+
+  const handleUpdateBranch = (updated) => {
+    setBranches((prev) =>
+      prev.map((b) => (b._id === updated._id ? updated : b))
+    );
+  };
+
   const visibleMessages = activeNodeId ? getPath(messages, activeNodeId) : messages;
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const filteredMessages = normalizedSearchQuery
@@ -321,6 +333,7 @@ const ChatWindow = ({ user, onLogout }) => {
           onSelect={setActiveConversationId}
           onCreate={handleCreateConversation}
           onDeleteConversation={handleDeleteConversation}
+          onUpdateConversation={handleUpdateConversation}
           style={{ width: "260px" }}
         />
 
@@ -389,6 +402,8 @@ const ChatWindow = ({ user, onLogout }) => {
           onSelect={setActiveBranchId}
           activeBranchId={activeBranchId}
           onDeleteBranch={handleDeleteBranch}
+            onUpdateBranch={handleUpdateBranch}
+            activeConversationId={activeConversationId}
           style={{ width: "360px" , overflowY: "hidden"}}
         />
       </div>

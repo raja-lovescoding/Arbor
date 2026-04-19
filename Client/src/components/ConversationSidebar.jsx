@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { updateConversationTitle } from "../services/api";
 
 const ConversationSidebar = ({
   conversations,
@@ -6,9 +7,42 @@ const ConversationSidebar = ({
   onSelect,
   onCreate,
   onDeleteConversation,
+  onUpdateConversation,
   style,
 }) => {
   const [openMenuConversationId, setOpenMenuConversationId] = useState(null);
+  const [renamingConversationId, setRenamingConversationId] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const handleRenameClick = (conversation) => {
+    setRenamingConversationId(conversation._id);
+    setRenameValue(conversation.title || "New Chat");
+  };
+
+  const handleRenameSave = async (conversationId) => {
+    if (!renameValue.trim()) {
+      setRenamingConversationId(null);
+      return;
+    }
+    try {
+      const updated = await updateConversationTitle(conversationId, renameValue);
+      if (onUpdateConversation) {
+        onUpdateConversation(updated);
+      }
+      setRenamingConversationId(null);
+      setOpenMenuConversationId(null);
+    } catch (err) {
+      alert(err.message || "Failed to rename conversation");
+    }
+  };
+
+  const handleRenameKeyDown = (e, conversationId) => {
+    if (e.key === "Enter") {
+      handleRenameSave(conversationId);
+    } else if (e.key === "Escape") {
+      setRenamingConversationId(null);
+    }
+  };
 
   return (
     <div
@@ -41,7 +75,11 @@ const ConversationSidebar = ({
       {conversations.map((conversation) => (
         <div
           key={conversation._id}
-          onClick={() => onSelect(conversation._id)}
+          onClick={() => {
+            if (renamingConversationId !== conversation._id) {
+              onSelect(conversation._id);
+            }
+          }}
           className={`conversation-item ${openMenuConversationId === conversation._id ? "is-menu-open" : ""}`}
           style={{
             padding: "9px",
@@ -57,17 +95,36 @@ const ConversationSidebar = ({
             gap: "8px",
           }}
         >
-          <span
-            style={{
-              minWidth: 0,
-              flex: 1,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {conversation.title || "New Chat"}
-          </span>
+          {renamingConversationId === conversation._id ? (
+            <input
+              autoFocus
+              type="text"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => handleRenameKeyDown(e, conversation._id)}
+              onBlur={() => handleRenameSave(conversation._id)}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                flex: 1,
+                padding: "4px 6px",
+                border: "1px solid #2563eb",
+                borderRadius: "4px",
+                fontSize: "14px",
+              }}
+            />
+          ) : (
+            <span
+              style={{
+                minWidth: 0,
+                flex: 1,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {conversation.title || "New Chat"}
+            </span>
+          )}
           <div className="conversation-actions">
             <button
               type="button"
@@ -87,6 +144,29 @@ const ConversationSidebar = ({
 
             {openMenuConversationId === conversation._id ? (
               <div className="actions-menu-card" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="conversation-rename"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRenameClick(conversation);
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    border: "none",
+                    background: "#e0f2fe",
+                    color: "#0369a1",
+                    borderRadius: "6px",
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                    marginBottom: "6px",
+                    fontSize: "12px",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  Rename
+                </button>
                 <button
                   type="button"
                   className="conversation-delete"

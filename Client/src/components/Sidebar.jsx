@@ -1,7 +1,40 @@
 import { useState } from "react";
+import { updateBranchTitle } from "../services/api";
 
-const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) => {
+const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateBranch, activeConversationId, style }) => {
   const [openMenuBranchId, setOpenMenuBranchId] = useState(null);
+  const [renamingBranchId, setRenamingBranchId] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const handleRenameClick = (branch) => {
+    setRenamingBranchId(branch._id);
+    setRenameValue(branch.title || `Branch ${branch._id.slice(-4)}`);
+  };
+
+  const handleRenameSave = async (branchId) => {
+    if (!renameValue.trim()) {
+      setRenamingBranchId(null);
+      return;
+    }
+    try {
+      const updated = await updateBranchTitle(branchId, renameValue, activeConversationId);
+      if (onUpdateBranch) {
+        onUpdateBranch(updated);
+      }
+      setRenamingBranchId(null);
+      setOpenMenuBranchId(null);
+    } catch (err) {
+      alert(err.message || "Failed to rename branch");
+    }
+  };
+
+  const handleRenameKeyDown = (e, branchId) => {
+    if (e.key === "Enter") {
+      handleRenameSave(branchId);
+    } else if (e.key === "Escape") {
+      setRenamingBranchId(null);
+    }
+  };
 
   const map = {};
   const roots = [];
@@ -25,10 +58,33 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) 
       style={{ "--branch-level": level }}
     >
       <div
-        onClick={() => onSelect(node._id)}
+        onClick={() => {
+          if (renamingBranchId !== node._id) {
+            onSelect(node._id);
+          }
+        }}
         className={`branch-item ${node._id === activeBranchId ? "is-active" : ""} ${openMenuBranchId === node._id ? "is-menu-open" : ""}`}
       >
-        <span className="branch-title">{node.title || `Branch ${node._id.slice(-4)}`}</span>
+        {renamingBranchId === node._id ? (
+          <input
+            autoFocus
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => handleRenameKeyDown(e, node._id)}
+            onBlur={() => handleRenameSave(node._id)}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              flex: 1,
+              padding: "4px 6px",
+              border: "1px solid #2563eb",
+              borderRadius: "4px",
+              fontSize: "14px",
+            }}
+          />
+        ) : (
+          <span className="branch-title">{node.title || `Branch ${node._id.slice(-4)}`}</span>
+        )}
         <div className="branch-actions">
           <button
             type="button"
@@ -46,6 +102,28 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) 
 
           {openMenuBranchId === node._id ? (
             <div className="actions-menu-card" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRenameClick(node);
+                }}
+                style={{
+                  display: "inline-flex",
+                  border: "none",
+                  background: "#e0f2fe",
+                  color: "#0369a1",
+                  borderRadius: "6px",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  marginBottom: "6px",
+                  fontSize: "12px",
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+              >
+                Rename
+              </button>
               <button
                 type="button"
                 onClick={(e) => {

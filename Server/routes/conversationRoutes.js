@@ -55,4 +55,31 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    const userId = req.user.uid;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: "Title cannot be empty" });
+    }
+
+    const conversation = await Conversation.findOne({ _id: id, userId });
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found" });
+    }
+
+    const updated = await Conversation.findByIdAndUpdate(
+      id,
+      { title: title.trim() },
+      { new: true }
+    );
+
+    return res.json(updated);
+  } catch (_err) {
+    return res.status(500).json({ error: "Failed to update conversation" });
+  }
+});
+
 export default router;

@@ -99,4 +99,35 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, conversationId } = req.body;
+    const userId = req.user.uid;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: "Title cannot be empty" });
+    }
+
+    if (!conversationId) {
+      return res.status(400).json({ error: "conversationId is required" });
+    }
+
+    const branch = await Branch.findOne({ _id: id, conversationId, userId });
+    if (!branch) {
+      return res.status(404).json({ error: "Branch not found" });
+    }
+
+    const updated = await Branch.findByIdAndUpdate(
+      id,
+      { title: title.trim() },
+      { new: true }
+    );
+
+    return res.json(updated);
+  } catch (_err) {
+    return res.status(500).json({ error: "Failed to update branch" });
+  }
+});
+
 export default router;
