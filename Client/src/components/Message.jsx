@@ -1,6 +1,61 @@
 import { createBranch } from "../services/api";
 
-const renderInlineMarkdown = (text, keyPrefix) => {
+const escapeRegExp = (value) => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildHighlightRegex = (query) => {
+  const tokens = String(query || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(escapeRegExp)
+    .sort((a, b) => b.length - a.length);
+
+  if (tokens.length === 0) {
+    return null;
+  }
+
+  return new RegExp(`(${tokens.join("|")})`, "gi");
+};
+
+const renderHighlightedText = (text, query, keyPrefix, baseKey = "t") => {
+  const value = String(text || "");
+  const regex = buildHighlightRegex(query);
+
+  if (!regex) {
+    return value;
+  }
+
+  const segments = value.split(regex);
+
+  return segments.map((segment, idx) => {
+    if (!segment) {
+      return null;
+    }
+
+    const isMatch = regex.test(segment);
+    regex.lastIndex = 0;
+
+    if (isMatch) {
+      return (
+        <mark
+          key={`${keyPrefix}-${baseKey}-${idx}`}
+          style={{
+            background: "#fde68a",
+            color: "inherit",
+            padding: "0 2px",
+            borderRadius: "3px",
+          }}
+        >
+          {segment}
+        </mark>
+      );
+    }
+
+    return <span key={`${keyPrefix}-${baseKey}-${idx}`}>{segment}</span>;
+  });
+};
+
+const renderInlineMarkdown = (text, keyPrefix, searchQuery) => {
   const value = String(text || "");
   const parts = value.split(/(\*\*[^*]+\*\*)/g);
 
@@ -8,14 +63,14 @@ const renderInlineMarkdown = (text, keyPrefix) => {
     const boldMatch = part.match(/^\*\*([^*]+)\*\*$/);
 
     if (boldMatch) {
-      return <strong key={`${keyPrefix}-b-${idx}`}>{boldMatch[1]}</strong>;
+      return <strong key={`${keyPrefix}-b-${idx}`}>{renderHighlightedText(boldMatch[1], searchQuery, `${keyPrefix}-b-${idx}`)}</strong>;
     }
 
-    return <span key={`${keyPrefix}-t-${idx}`}>{part}</span>;
+    return <span key={`${keyPrefix}-t-${idx}`}>{renderHighlightedText(part, searchQuery, `${keyPrefix}-t-${idx}`)}</span>;
   });
 };
 
-const renderHeadingLine = (line, key) => {
+const renderHeadingLine = (line, key, searchQuery) => {
   const match = line.match(/^(#{1,6})\s+(.*)$/);
 
   if (!match) {
@@ -43,12 +98,12 @@ const renderHeadingLine = (line, key) => {
         lineHeight: 1.35,
       }}
     >
-      {renderInlineMarkdown(text, key)}
+      {renderInlineMarkdown(text, key, searchQuery)}
     </div>
   );
 };
 
-const renderPlainTextBlock = (text) => {
+const renderPlainTextBlock = (text, searchQuery) => {
   const lines = String(text || "").split("\n");
   const nodes = [];
   let bulletBuffer = [];
@@ -59,7 +114,7 @@ const renderPlainTextBlock = (text) => {
       <ul key={`ul-${nodes.length}`} style={{ margin: "6px 0 10px", paddingLeft: "20px" }}>
         {bulletBuffer.map((item, idx) => (
           <li key={`li-${idx}`} style={{ marginBottom: "4px" }}>
-            {renderInlineMarkdown(item, `li-${idx}`)}
+            {renderInlineMarkdown(item, `li-${idx}`, searchQuery)}
           </li>
         ))}
       </ul>
@@ -82,7 +137,7 @@ const renderPlainTextBlock = (text) => {
       return;
     }
 
-    const headingNode = renderHeadingLine(line.trim(), `h-${nodes.length}`);
+    const headingNode = renderHeadingLine(line.trim(), `h-${nodes.length}`, searchQuery);
 
     if (headingNode) {
       nodes.push(headingNode);
@@ -91,7 +146,7 @@ const renderPlainTextBlock = (text) => {
 
     nodes.push(
       <p key={`p-${nodes.length}`} style={{ margin: "0 0 8px", whiteSpace: "pre-wrap" }}>
-        {renderInlineMarkdown(line, `p-${nodes.length}`)}
+        {renderInlineMarkdown(line, `p-${nodes.length}`, searchQuery)}
       </p>
     );
   });
@@ -100,7 +155,7 @@ const renderPlainTextBlock = (text) => {
   return nodes;
 };
 
-const renderFormattedContent = (content) => {
+const renderFormattedContent = (content, searchQuery) => {
   const parts = String(content || "").split(/```/);
 
   return parts.map((part, idx) => {
@@ -120,12 +175,12 @@ const renderFormattedContent = (content) => {
             whiteSpace: "pre-wrap",
           }}
         >
-          <code>{part.trim()}</code>
+          <code>{renderHighlightedText(part.trim(), searchQuery, `code-${idx}`)}</code>
         </pre>
       );
     }
 
-    return <div key={`txt-${idx}`}>{renderPlainTextBlock(part)}</div>;
+    return <div key={`txt-${idx}`}>{renderPlainTextBlock(part, searchQuery)}</div>;
   });
 };
 
@@ -135,6 +190,7 @@ const Message = ({
   activeBranchId,
   activeConversationId,
   onBranchCreate,
+  searchQuery,
 }) => {
   return (
     <div
@@ -156,7 +212,7 @@ const Message = ({
           wordBreak: "break-word",
         }}
       >
-        {renderFormattedContent(msg.content)}
+        {renderFormattedContent(msg.content, searchQuery)}
       </div>
 
       <button

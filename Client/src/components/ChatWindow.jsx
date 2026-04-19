@@ -27,6 +27,7 @@ const ChatWindow = ({ user, onLogout }) => {
   const [isAIloading, setIsAILoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const streamTimerRef = useRef(null);
 
   useEffect(() => {
@@ -108,6 +109,10 @@ const ChatWindow = ({ user, onLogout }) => {
     clearStreamingTimer();
     setIsStreaming(false);
     setStreamingMessageId(null);
+  }, [activeConversationId]);
+
+  useEffect(() => {
+    setSearchQuery("");
   }, [activeConversationId]);
 
   const handleCreateConversation = async () => {
@@ -291,10 +296,23 @@ const ChatWindow = ({ user, onLogout }) => {
   };
 
   const visibleMessages = activeNodeId ? getPath(messages, activeNodeId) : messages;
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredMessages = normalizedSearchQuery
+    ? visibleMessages.filter((msg) =>
+        String(msg.content || "").toLowerCase().includes(normalizedSearchQuery)
+      )
+    : visibleMessages;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
-      <Header user={user} onLogout={onLogout} />
+      <Header
+        user={user}
+        onLogout={onLogout}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearchSubmit={setSearchQuery}
+        onSearchClear={() => setSearchQuery("")}
+      />
 
       <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
         <ConversationSidebar
@@ -313,13 +331,14 @@ const ChatWindow = ({ user, onLogout }) => {
           {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
 
           <div style={{ flex: 1, overflowY: "auto", paddingBottom: "10px" }}>
-            {visibleMessages.map((msg) => (
+            {filteredMessages.map((msg) => (
               <Message
                 key={msg._id}
                 msg={msg}
                 isActive={msg._id === activeNodeId}
                 activeBranchId={activeBranchId}
                 activeConversationId={activeConversationId}
+                searchQuery={searchQuery}
                 onBranchCreate={(branch) => {
                   setBranches((prev) => [...prev, branch]);
                   setActiveBranchId(branch._id);
@@ -338,6 +357,20 @@ const ChatWindow = ({ user, onLogout }) => {
                 }}
               >
                 Loading respoinse...
+              </div>
+            ) : null}
+            {normalizedSearchQuery && filteredMessages.length === 0 ? (
+              <div
+                style={{
+                  margin: "10px 0",
+                  padding: "12px",
+                  border: "1px dashed #cbd5e1",
+                  borderRadius: "10px",
+                  color: "#64748b",
+                  background: "#f8fafc",
+                }}
+              >
+                No messages match this search in the open conversation.
               </div>
             ) : null}
             {isStreaming && streamingMessageId ? (

@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) => {
+  const [openMenuBranchId, setOpenMenuBranchId] = useState(null);
+
   const map = {};
   const roots = [];
 
@@ -22,22 +26,44 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, style }) 
     >
       <div
         onClick={() => onSelect(node._id)}
-        className={`branch-item ${node._id === activeBranchId ? "is-active" : ""}`}
+        className={`branch-item ${node._id === activeBranchId ? "is-active" : ""} ${openMenuBranchId === node._id ? "is-menu-open" : ""}`}
       >
         <span className="branch-title">{node.title || `Branch ${node._id.slice(-4)}`}</span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            const ok = window.confirm("Delete this branch and its child branches?");
-            if (!ok) return;
-            if (onDeleteBranch) {
-              onDeleteBranch(node._id);
-            }
-          }}
-          className="branch-delete"
-        >
-          Delete
-        </button>
+        <div className="branch-actions">
+          <button
+            type="button"
+            className="branch-menu-trigger"
+            aria-label="Branch actions"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenMenuBranchId((prev) => (prev === node._id ? null : node._id));
+            }}
+          >
+            <span className="menu-dot" />
+            <span className="menu-dot" />
+            <span className="menu-dot" />
+          </button>
+
+          {openMenuBranchId === node._id ? (
+            <div className="actions-menu-card" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const ok = window.confirm("Delete this branch and its child branches?");
+                  if (!ok) return;
+                  if (onDeleteBranch) {
+                    onDeleteBranch(node._id);
+                  }
+                  setOpenMenuBranchId(null);
+                }}
+                className="branch-delete"
+              >
+                Delete
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {node.children.length > 0 ? (

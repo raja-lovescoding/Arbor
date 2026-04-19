@@ -209,22 +209,83 @@ body {
 .branch-delete {
   font-size: 12px;
   display: none;
+  border: none;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
 }
 
-.branch-item:hover .branch-delete,
-.branch-item:focus-within .branch-delete {
+.branch-actions,
+.conversation-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.branch-menu-trigger,
+.conversation-menu-trigger {
+  display: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.branch-item:hover .branch-menu-trigger,
+.branch-item:focus-within .branch-menu-trigger,
+.branch-item.is-menu-open .branch-menu-trigger,
+.conversation-item:hover .conversation-menu-trigger,
+.conversation-item:focus-within .conversation-menu-trigger,
+.conversation-item.is-menu-open .conversation-menu-trigger {
   display: inline-flex;
+}
+
+.menu-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #475569;
 }
 
 .branch-children {
   margin-top: 2px;
 }
 
-.conversation-item .conversation-delete {
-  display: none;
+.conversation-delete {
+  display: inline-flex;
+  border: none;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
 }
 
-.conversation-item:hover .conversation-delete,
-.conversation-item:focus-within .conversation-delete {
+.actions-menu-card {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  z-index: 20;
+}
+
+.actions-menu-card .branch-delete,
+.actions-menu-card .conversation-delete {
   display: inline-flex;
+  width: 100%;
 }

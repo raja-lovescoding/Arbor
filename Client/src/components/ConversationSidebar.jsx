@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const ConversationSidebar = ({
   conversations,
   activeConversationId,
@@ -6,6 +8,8 @@ const ConversationSidebar = ({
   onDeleteConversation,
   style,
 }) => {
+  const [openMenuConversationId, setOpenMenuConversationId] = useState(null);
+
   return (
     <div
       style={{
@@ -38,7 +42,7 @@ const ConversationSidebar = ({
         <div
           key={conversation._id}
           onClick={() => onSelect(conversation._id)}
-          className="conversation-item"
+          className={`conversation-item ${openMenuConversationId === conversation._id ? "is-menu-open" : ""}`}
           style={{
             padding: "9px",
             cursor: "pointer",
@@ -64,30 +68,45 @@ const ConversationSidebar = ({
           >
             {conversation.title || "New Chat"}
           </span>
-          <button
-            type="button"
-            className="conversation-delete"
-            onClick={(e) => {
-              e.stopPropagation();
-              const ok = window.confirm("Delete this conversation?");
-              if (!ok) {
-                return;
-              }
-              if(onDeleteConversation) {
-                onDeleteConversation(conversation._id);
-              }
-            }}
-            style={{
-              fontSize: "12px",
-              color: "crimson",
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              flexShrink: 0,
-            }}
-          >
-            Delete
-          </button>
+          <div className="conversation-actions">
+            <button
+              type="button"
+              className="conversation-menu-trigger"
+              aria-label="Conversation actions"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenMenuConversationId((prev) =>
+                  prev === conversation._id ? null : conversation._id
+                );
+              }}
+            >
+              <span className="menu-dot" />
+              <span className="menu-dot" />
+              <span className="menu-dot" />
+            </button>
+
+            {openMenuConversationId === conversation._id ? (
+              <div className="actions-menu-card" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="conversation-delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const ok = window.confirm("Delete this conversation?");
+                    if (!ok) {
+                      return;
+                    }
+                    if (onDeleteConversation) {
+                      onDeleteConversation(conversation._id);
+                    }
+                    setOpenMenuConversationId(null);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            ) : null}
+          </div>
 
         </div>
       ))}
