@@ -44,10 +44,67 @@ function App() {
 
   if (!authReady) {
     return (
-      <div className="login-page">
-        <div className="login-card">
-          <h2 className="login-title">Checking your session...</h2>
-          <p className="login-subtitle">Please wait a moment.</p>
+      <div className="skeleton-container" aria-busy="true" aria-live="polite">
+        <header className="skeleton-header">
+          <div className="skeleton-logo circle skeleton-block" />
+          <div className="skeleton-search-bar skeleton-block" />
+          <div className="skeleton-profile">
+            <div className="skeleton-text small skeleton-block" style={{ width: "80px" }} />
+            <div className="skeleton-avatar circle skeleton-block" />
+          </div>
+        </header>
+
+        <div className="skeleton-main">
+          <aside className="skeleton-sidebar">
+            <div className="sidebar-header">
+              <div className="skeleton-text skeleton-block" style={{ width: "40px" }} />
+              <div className="skeleton-icon-btn skeleton-block" />
+            </div>
+            <div className="skeleton-list-item active skeleton-block" />
+            <div className="skeleton-list-item skeleton-block" />
+            <div className="skeleton-list-item skeleton-block" />
+            <div className="skeleton-list-item skeleton-block" />
+            <div className="skeleton-list-item skeleton-block" />
+            <div className="skeleton-list-item skeleton-block" />
+          </aside>
+
+          <main className="skeleton-chat">
+            <div className="skeleton-chat-title skeleton-block" />
+
+            <div className="msg-row user">
+              <div className="skeleton-bubble bubble-user skeleton-block" />
+            </div>
+
+            <div className="msg-row bot">
+              <div className="skeleton-text skeleton-block" style={{ width: "30px", marginBottom: "10px" }} />
+              <div className="skeleton-text skeleton-block" style={{ width: "60%" }} />
+              <div className="skeleton-text skeleton-block" style={{ width: "40%" }} />
+              <div className="skeleton-button skeleton-block" />
+            </div>
+
+            <div className="msg-row user">
+              <div className="skeleton-bubble bubble-user skeleton-block" style={{ height: "60px" }} />
+            </div>
+
+            <div className="msg-row bot">
+              <div className="skeleton-text skeleton-block" style={{ width: "30px" }} />
+              <div className="skeleton-text skeleton-block" style={{ width: "80%" }} />
+              <div className="skeleton-text bullet skeleton-block" />
+              <div className="skeleton-text bullet skeleton-block" />
+              <div className="skeleton-text bullet skeleton-block" />
+            </div>
+
+            <div className="skeleton-input-bar skeleton-block" />
+          </main>
+
+          <aside className="skeleton-right-panel">
+            <div className="skeleton-text skeleton-block" style={{ width: "80px", marginBottom: "20px" }} />
+            <div className="skeleton-tree-item skeleton-block" />
+            <div className="skeleton-tree-item indent-1 skeleton-block" />
+            <div className="skeleton-tree-item indent-2 skeleton-block" />
+            <div className="skeleton-tree-item skeleton-block" />
+            <div className="skeleton-tree-item indent-1 skeleton-block" />
+          </aside>
         </div>
       </div>
     );
