@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { updateConversationTitle } from "../services/api";
 import ConfirmDialog from "./ConfirmDialog";
 
@@ -15,6 +15,32 @@ const ConversationSidebar = ({
   const [renamingConversationId, setRenamingConversationId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
   const [confirmConversation, setConfirmConversation] = useState(null);
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!sidebarRef.current) return;
+      if (!sidebarRef.current.contains(event.target)) {
+        setOpenMenuConversationId(null);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setOpenMenuConversationId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const handleRenameClick = (conversation) => {
     setRenamingConversationId(conversation._id);
@@ -49,6 +75,7 @@ const ConversationSidebar = ({
   return (
     <div
       className="conversation-sidebar"
+      ref={sidebarRef}
       style={{ ...style }}
     >
       <div className="sidebar-panel-header">

@@ -8,6 +8,8 @@ const Header = ({
   onSearchChange,
   onSearchSubmit,
   onSearchClear,
+  isBeigeTheme,
+  onToggleTheme,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -30,9 +32,19 @@ const Header = ({
       }
     };
 
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -42,7 +54,7 @@ const Header = ({
         <h3 className="header-logo-wrap">
           <img
             className="header-logo"
-            src="/QT%20icons/QT_logo.png"
+            src="/QT%20icons/arbor_logo.png"
             alt=""
           />
         </h3>

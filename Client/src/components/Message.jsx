@@ -198,7 +198,7 @@ const Message = ({
     <div
       className={`message-card ${isUserMessage ? "message-card--user" : "message-card--assistant"} ${isActive ? "message-card--active" : ""}`}
     >
-      <strong className="message-role-label">{isUserMessage ? "You" : "QT"}:</strong>
+      <strong className="message-role-label">{isUserMessage ? "You" : ""}</strong>
       <div className="message-content">
         {renderFormattedContent(msg.content, searchQuery)}
       </div>

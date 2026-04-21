@@ -30,7 +30,9 @@ const ChatWindow = ({ user, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [draftMessage, setDraftMessage] = useState("");
   const [isComposerDocked, setIsComposerDocked] = useState(false);
+  const [recentBranchId, setRecentBranchId] = useState(null);
   const streamTimerRef = useRef(null);
+  const recentBranchTimerRef = useRef(null);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -105,6 +107,10 @@ const ChatWindow = ({ user, onLogout }) => {
   useEffect(() => {
     return () => {
       clearStreamingTimer();
+      if (recentBranchTimerRef.current) {
+        clearTimeout(recentBranchTimerRef.current);
+        recentBranchTimerRef.current = null;
+      }
     };
   }, []);
 
@@ -137,6 +143,19 @@ const ChatWindow = ({ user, onLogout }) => {
     } catch (err) {
       setError(err.message || "Failed to create conversation");
     }
+  };
+
+  const markRecentBranch = (branchId) => {
+    if (recentBranchTimerRef.current) {
+      clearTimeout(recentBranchTimerRef.current);
+      recentBranchTimerRef.current = null;
+    }
+
+    setRecentBranchId(branchId);
+    recentBranchTimerRef.current = setTimeout(() => {
+      setRecentBranchId(null);
+      recentBranchTimerRef.current = null;
+    }, 650);
   };
 
   const streamAssistantMessage = (assistantMessageId, fullText) => {
@@ -218,6 +237,7 @@ const ChatWindow = ({ user, onLogout }) => {
       streamAssistantMessage(assistantMessageId, data.assistant.content);
 
       if (data.branch?._id) {
+        markRecentBranch(data.branch._id);
         setActiveBranchId(data.branch._id);
         setBranches((prev) => {
           const hasExisting = prev.some((b) => b._id === data.branch._id);
@@ -367,6 +387,7 @@ const ChatWindow = ({ user, onLogout }) => {
                 searchQuery={searchQuery}
                 onBranchCreate={(branch) => {
                   setBranches((prev) => [...prev, branch]);
+                  markRecentBranch(branch._id);
                   setActiveBranchId(branch._id);
                   setActiveNodeId(branch.lastMessageId || msg._id);
                 }}
@@ -415,6 +436,7 @@ const ChatWindow = ({ user, onLogout }) => {
           branches={branches}
           onSelect={setActiveBranchId}
           activeBranchId={activeBranchId}
+          recentBranchId={recentBranchId}
           onDeleteBranch={handleDeleteBranch}
             onUpdateBranch={handleUpdateBranch}
             activeConversationId={activeConversationId}

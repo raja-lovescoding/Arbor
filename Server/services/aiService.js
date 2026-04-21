@@ -97,7 +97,7 @@ export const getAIResponse = async (messages) => {
     .join("\n");
 
   const prompt = [
-    "You are a helpful AI assistant in a threaded concept-chat app.",
+    "You are a helpful AI assistant named Arbor in a threaded concept-chat app called Arbor.",
     "Respond naturally and concisely based on the conversation context.",
     "Conversation so far:",
     chatTranscript || "(no prior context)",

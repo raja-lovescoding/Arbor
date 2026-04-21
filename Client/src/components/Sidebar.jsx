@@ -1,12 +1,38 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { updateBranchTitle } from "../services/api";
 import ConfirmDialog from "./ConfirmDialog";
 
-const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateBranch, activeConversationId, style }) => {
+const Sidebar = ({ branches, onSelect, activeBranchId, recentBranchId, onDeleteBranch, onUpdateBranch, activeConversationId, style }) => {
   const [openMenuBranchId, setOpenMenuBranchId] = useState(null);
   const [renamingBranchId, setRenamingBranchId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
   const [confirmBranch, setConfirmBranch] = useState(null);
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!sidebarRef.current) return;
+      if (!sidebarRef.current.contains(event.target)) {
+        setOpenMenuBranchId(null);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setOpenMenuBranchId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const handleRenameClick = (branch) => {
     setRenamingBranchId(branch._id);
@@ -56,7 +82,7 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateB
   const renderNode = (node, level = 1, isLast = false) => (
     <div
       key={node._id}
-      className={`branch-node ${level === 1 ? "branch-node--root" : ""} ${isLast ? "branch-node--last" : ""}`}
+      className={`branch-node ${level === 1 ? "branch-node--root" : ""} ${isLast ? "branch-node--last" : ""} ${node._id === recentBranchId ? "branch-node--recent" : ""}`}
       style={{ "--branch-level": level }}
     >
       <div
@@ -139,6 +165,7 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateB
   return (
     <div
       className="branch-sidebar"
+      ref={sidebarRef}
       style={{
         ...style,
       }}
