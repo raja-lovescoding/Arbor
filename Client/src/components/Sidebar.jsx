@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { updateBranchTitle } from "../services/api";
+import ConfirmDialog from "./ConfirmDialog";
 
 const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateBranch, activeConversationId, style }) => {
   const [openMenuBranchId, setOpenMenuBranchId] = useState(null);
   const [renamingBranchId, setRenamingBranchId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
+  const [confirmBranch, setConfirmBranch] = useState(null);
 
   const handleRenameClick = (branch) => {
     setRenamingBranchId(branch._id);
@@ -112,11 +114,7 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateB
                 className="branch-delete menu-action-button action-danger"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const ok = window.confirm("Delete this branch and its child branches?");
-                  if (!ok) return;
-                  if (onDeleteBranch) {
-                    onDeleteBranch(node._id);
-                  }
+                  setConfirmBranch(node);
                   setOpenMenuBranchId(null);
                 }}
               >
@@ -150,6 +148,19 @@ const Sidebar = ({ branches, onSelect, activeBranchId, onDeleteBranch, onUpdateB
         Branches
       </h3>
       {roots.map((root, index) => renderNode(root, 1, index === roots.length - 1))}
+
+      <ConfirmDialog
+        open={Boolean(confirmBranch)}
+        title="Delete branch"
+        message="Delete this branch and all child branches?"
+        onCancel={() => setConfirmBranch(null)}
+        onConfirm={() => {
+          if (confirmBranch && onDeleteBranch) {
+            onDeleteBranch(confirmBranch._id);
+          }
+          setConfirmBranch(null);
+        }}
+      />
     </div>
   );
 };

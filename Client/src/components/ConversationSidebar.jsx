@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { updateConversationTitle } from "../services/api";
+import ConfirmDialog from "./ConfirmDialog";
 
 const ConversationSidebar = ({
   conversations,
@@ -13,6 +14,7 @@ const ConversationSidebar = ({
   const [openMenuConversationId, setOpenMenuConversationId] = useState(null);
   const [renamingConversationId, setRenamingConversationId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
+  const [confirmConversation, setConfirmConversation] = useState(null);
 
   const handleRenameClick = (conversation) => {
     setRenamingConversationId(conversation._id);
@@ -122,13 +124,7 @@ const ConversationSidebar = ({
                   className="conversation-delete menu-action-button action-danger"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const ok = window.confirm("Delete this conversation?");
-                    if (!ok) {
-                      return;
-                    }
-                    if (onDeleteConversation) {
-                      onDeleteConversation(conversation._id);
-                    }
+                    setConfirmConversation(conversation);
                     setOpenMenuConversationId(null);
                   }}
                 >
@@ -141,6 +137,19 @@ const ConversationSidebar = ({
 
         </div>
       ))}
+
+      <ConfirmDialog
+        open={Boolean(confirmConversation)}
+        title="Delete conversation"
+        message="Are you sure you want to delete this conversation?"
+        onCancel={() => setConfirmConversation(null)}
+        onConfirm={() => {
+          if (confirmConversation && onDeleteConversation) {
+            onDeleteConversation(confirmConversation._id);
+          }
+          setConfirmConversation(null);
+        }}
+      />
     </div>
   );
 };

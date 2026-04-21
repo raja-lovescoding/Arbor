@@ -28,6 +28,8 @@ const ChatWindow = ({ user, onLogout }) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [draftMessage, setDraftMessage] = useState("");
+  const [isComposerDocked, setIsComposerDocked] = useState(false);
   const streamTimerRef = useRef(null);
 
   useEffect(() => {
@@ -67,6 +69,7 @@ const ChatWindow = ({ user, onLogout }) => {
 
       setBranches(safeBranches);
       setMessages(safeMessages);
+      setIsComposerDocked(safeMessages.length > 0);
 
       if (safeBranches.length > 0) {
         const latestBranch = safeBranches[safeBranches.length - 1];
@@ -115,6 +118,11 @@ const ChatWindow = ({ user, onLogout }) => {
     setSearchQuery("");
   }, [activeConversationId]);
 
+  useEffect(() => {
+    setDraftMessage("");
+    setIsComposerDocked(false);
+  }, [activeConversationId]);
+
   const handleCreateConversation = async () => {
     try {
       const conversation = await createConversation();
@@ -124,6 +132,7 @@ const ChatWindow = ({ user, onLogout }) => {
 
       setConversations((prev) => [conversation, ...prev]);
       setActiveConversationId(conversation._id);
+      setIsComposerDocked(false);
       setError("");
     } catch (err) {
       setError(err.message || "Failed to create conversation");
@@ -162,6 +171,8 @@ const ChatWindow = ({ user, onLogout }) => {
     if (!activeConversationId) {
       return;
     }
+
+    setDraftMessage("");
 
     clearStreamingTimer();
     setIsStreaming(false);
@@ -314,6 +325,8 @@ const ChatWindow = ({ user, onLogout }) => {
         String(msg.content || "").toLowerCase().includes(normalizedSearchQuery)
       )
     : visibleMessages;
+  const isConversationEmpty = filteredMessages.length === 0 && !normalizedSearchQuery;
+  const showCenteredComposer = isConversationEmpty && !isComposerDocked;
 
   return (
     <div className="app-shell">
@@ -343,7 +356,7 @@ const ChatWindow = ({ user, onLogout }) => {
           </h2>
           {error ? <p className="chat-error">{error}</p> : null}
 
-          <div className="message-list">
+          <div className={`message-list ${showCenteredComposer ? "" : "message-list--with-composer"}`}>
             {filteredMessages.map((msg) => (
               <Message
                 key={msg._id}
@@ -354,12 +367,20 @@ const ChatWindow = ({ user, onLogout }) => {
                 searchQuery={searchQuery}
                 onBranchCreate={(branch) => {
                   setBranches((prev) => [...prev, branch]);
+                  setActiveBranchId(branch._id);
+                  setActiveNodeId(branch.lastMessageId || msg._id);
                 }}
               />
             ))}
             {isAIloading ? (
-              <div className="chat-loading"> 
-                Loading respoinse...
+              <div
+                className="chat-loading chat-loading--dots"
+                aria-label="AI is loading"
+                aria-live="polite"
+              >
+                <span className="chat-loading-dot" />
+                <span className="chat-loading-dot" />
+                <span className="chat-loading-dot" />
               </div>
             ) : null}
             {normalizedSearchQuery && filteredMessages.length === 0 ? (
@@ -373,9 +394,21 @@ const ChatWindow = ({ user, onLogout }) => {
               </div>
             ) : null}
           </div>
-          
-            <InputBox onSend={handleSend} />
-          
+
+          <div className={`composer-stage ${showCenteredComposer ? "composer-stage--centered" : "composer-stage--docked"}`}>
+            <div className={`composer-empty-copy ${showCenteredComposer ? "is-visible" : ""}`}>
+              What do you want to learn today?
+            </div>
+            <div className="composer-shell">
+              <InputBox
+                value={draftMessage}
+                onChange={setDraftMessage}
+                onSend={handleSend}
+                onSendButton={() => setIsComposerDocked(true)}
+              />
+            </div>
+          </div>
+
         </div>
 
         <Sidebar
