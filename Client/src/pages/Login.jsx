@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { auth, googleProvider, isFirebaseConfigured } from "../auth/firebase";
 
 const Login = () => {
@@ -23,6 +23,18 @@ const Login = () => {
       setIsLoading(true);
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
+      const errorCode = err?.code || "";
+
+      if (errorCode === "auth/popup-blocked") {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
+      if (errorCode === "auth/unauthorized-domain") {
+        setError("This domain is not authorized in Firebase. Add your Vercel domain in Firebase Auth > Settings > Authorized domains.");
+        return;
+      }
+
       setError(err?.message || "Google sign-in failed.");
     } finally {
       setIsLoading(false);
