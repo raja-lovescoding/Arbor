@@ -15,10 +15,10 @@ Concept-Tree lets you create branching chat sessions so you can explore multiple
 
 ## Tech Stack
 
-- **Client**: JavaScript, HTML, CSS (React or plain JS, depending on your implementation)
-- **Server**: Node.js backend (Express or similar)
-- **Auth**: Email/password and Google login
-- **Database**: (Add your DB here, e.g. MongoDB / PostgreSQL / etc.)
+- **Client**: JavaScript, HTML, CSS 
+- **Server**: Node.js , Express
+- **Auth**: Google login with firebase authentication
+- **Database**: Mongodb
 - **Other**: See `package.json` for full dependency list.
 
 ## Project Structure

@@ -43,15 +43,32 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <div className="login-card">
-        <h2 className="login-title">Welcome back</h2>
-        <p className="login-subtitle">Login with Google to access your chats.</p>
+      <div className="login-video-shell" aria-hidden="true">
+        <video className="login-video" autoPlay muted loop playsInline>
+          <source src="/login-bg.mp4" type="video/mp4" />
+        </video>
+        <div className="login-video-overlay" />
+      </div>
 
-        <button className="google-login-button" onClick={handleGoogleLogin} disabled={isLoading}>
-          {isLoading ? "Signing in..." : "Continue with Google"}
-        </button>
+      <div className="login-content">
+        <div className="login-card">
+          <div className="login-brand-row">
+            <img className="login-brand-logo" src="/QT%20icons/arbor_logo.png" alt="" />
+            <span className="login-brand-name">Arbor</span>
+          </div>
 
-        {error ? <p className="login-error">{error}</p> : null}
+          <h2 className="login-title">Welcome to Arbor</h2>
+          <p className="login-subtitle">Sign in with Google to start building your tree</p>
+
+          <button className="google-login-button" onClick={handleGoogleLogin} disabled={isLoading}>
+            <span className="google-login-icon" aria-hidden="true">G</span>
+            <span>{isLoading ? "Signing in..." : "Continue with Google"}</span>
+          </button>
+
+          {error ? <p className="login-error">{error}</p> : null}
+
+          <p className="login-video-note"></p>
+        </div>
       </div>
     </div>
   );
