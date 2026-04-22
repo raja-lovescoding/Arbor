@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { updateBranchTitle } from "../services/api";
 import ConfirmDialog from "./ConfirmDialog";
+import { formatTimestampFull, formatTimestampShort } from "../utils/formatTimestamp";
 
 const Sidebar = ({ branches, onSelect, activeBranchId, recentBranchId, onDeleteBranch, onUpdateBranch, activeConversationId, style }) => {
   const [openMenuBranchId, setOpenMenuBranchId] = useState(null);
@@ -80,6 +81,12 @@ const Sidebar = ({ branches, onSelect, activeBranchId, recentBranchId, onDeleteB
   });
 
   const renderNode = (node, level = 1, isLast = false) => (
+    (() => {
+      const rawTimestamp = node.updatedAt || node.createdAt;
+      const timestamp = formatTimestampShort(rawTimestamp);
+      const fullTimestamp = formatTimestampFull(rawTimestamp);
+
+      return (
     <div
       key={node._id}
       className={`branch-node ${level === 1 ? "branch-node--root" : ""} ${isLast ? "branch-node--last" : ""} ${node._id === recentBranchId ? "branch-node--recent" : ""}`}
@@ -108,6 +115,11 @@ const Sidebar = ({ branches, onSelect, activeBranchId, recentBranchId, onDeleteB
           <span className="branch-title">{node.title || `Branch ${node._id.slice(-4)}`}</span>
         )}
         <div className="branch-actions">
+          {timestamp ? (
+            <span className="item-timestamp" title={fullTimestamp || undefined}>
+              {timestamp}
+            </span>
+          ) : null}
           <button
             type="button"
             className="branch-menu-trigger"
@@ -160,6 +172,8 @@ const Sidebar = ({ branches, onSelect, activeBranchId, recentBranchId, onDeleteB
         </div>
       ) : null}
     </div>
+      );
+    })()
   );
 
   return (

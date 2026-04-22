@@ -226,6 +226,15 @@
   position: relative;
 }
 
+.item-timestamp {
+  min-width: 48px;
+  text-align: right;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .branch-menu-trigger,
 .conversation-menu-trigger {
   display: none;

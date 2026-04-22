@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { updateConversationTitle } from "../services/api";
 import ConfirmDialog from "./ConfirmDialog";
+import { formatTimestampFull, formatTimestampShort } from "../utils/formatTimestamp";
 
 const ConversationSidebar = ({
   conversations,
@@ -85,11 +86,17 @@ const ConversationSidebar = ({
           className="sidebar-add-button"
           aria-label="Create conversation"
         >
-            <img className="qt-icon qt-icon--md" src="/QT%20icons/add.png" alt="" />
+          <img className="qt-icon qt-icon--md" src="/QT%20icons/add.png" alt="" />
         </button>
       </div>
 
       {conversations.map((conversation) => (
+        (() => {
+          const rawTimestamp = conversation.updatedAt || conversation.createdAt;
+          const timestamp = formatTimestampShort(rawTimestamp);
+          const fullTimestamp = formatTimestampFull(rawTimestamp);
+
+          return (
         <div
           key={conversation._id}
           onClick={() => {
@@ -117,6 +124,11 @@ const ConversationSidebar = ({
             </span>
           )}
           <div className="conversation-actions">
+            {timestamp ? (
+              <span className="item-timestamp" title={fullTimestamp || undefined}>
+                {timestamp}
+              </span>
+            ) : null}
             <button
               type="button"
               className="conversation-menu-trigger"
@@ -163,6 +175,8 @@ const ConversationSidebar = ({
           </div>
 
         </div>
+          );
+        })()
       ))}
 
       <ConfirmDialog
