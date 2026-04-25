@@ -33,6 +33,7 @@ const ChatWindow = ({ user, onLogout }) => {
   const [recentBranchId, setRecentBranchId] = useState(null);
   const [isConversationSidebarOpen, setIsConversationSidebarOpen] = useState(false);
   const [isBranchSidebarOpen, setIsBranchSidebarOpen] = useState(false);
+  const [showImprovementNote, setShowImprovementNote] = useState(true);
   const streamTimerRef = useRef(null);
   const recentBranchTimerRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -554,6 +555,22 @@ const ChatWindow = ({ user, onLogout }) => {
           style={{ width: "332px", overflowY: "hidden" }}
         />
       </div>
+
+      {showImprovementNote ? (
+        <aside className="improvement-note" role="status" aria-live="polite">
+          <button
+            type="button"
+            className="improvement-note-close"
+            aria-label="Hide notice"
+            onClick={() => setShowImprovementNote(false)}
+          >
+            X
+          </button>
+          <p className="improvement-note-text">
+            This site is improving day by day. It is not fully built by AI, and we are open to your ideas.
+          </p>
+        </aside>
+      ) : null}
     </div>
   );
 };

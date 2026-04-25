@@ -261,6 +261,69 @@
   height: 20px;
 }
 
+.improvement-note {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: min(360px, calc(100vw - 36px));
+  background: rgba(17, 17, 17, 0.93);
+  color: #f3f4f6;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 14px 34px 14px 14px;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.24);
+  z-index: 70;
+  animation: improvement-note-enter 360ms ease, improvement-note-float 2.8s ease-in-out infinite;
+}
+
+.improvement-note-close {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: #d1d5db;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.improvement-note-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.improvement-note-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e5e7eb;
+}
+
+@keyframes improvement-note-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes improvement-note-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
 @media (max-width: 920px) {
   .chat-main {
     padding: 14px 12px;
@@ -280,5 +343,14 @@
 @media (max-width: 760px) {
   .message-card {
     max-width: 88%;
+  }
+
+  .improvement-note {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    bottom: 12px;
+    padding: 12px 32px 12px 12px;
+    animation: improvement-note-enter 300ms ease, improvement-note-float 3s ease-in-out infinite;
   }
 }
