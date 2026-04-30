@@ -1,8 +1,8 @@
-# Query-Tree
+# Arbor
 
 Branched-based chatting with strong memory for all your needs.
 
-Concept-Tree lets you create branching chat sessions so you can explore multiple ideas without losing context. Each branch preserves long-term memory, making it easy to compare directions, revisit old thoughts, and keep your reasoning organized.
+Arbor lets you create branching chat sessions so you can explore multiple ideas without losing context. Each branch preserves long-term memory, making it easy to compare directions, revisit old thoughts, and keep your reasoning organized.
 
 ## Features
 
