@@ -16,7 +16,7 @@ Arbor lets you create branching chat sessions so you can explore multiple ideas 
 
 ## Tech Stack
 
-- **Client**: JavaScript, HTML, CSS 
+- **Client**: JavaScript, React.js, CSS 
 - **Server**: Node.js , Express
 - **Auth**: Google login with firebase authentication
 - **Database**: Mongodb
